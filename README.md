@@ -1,86 +1,170 @@
-# PfsenseAPI Module
+# PfsenseAPI Client
 
-The PfsenseAPI module is a Python library that simplifies interaction with the pfSense firewall's web interface. It provides a convenient way to automate common tasks such as user management, certificate management, and OpenVPN client configuration downloads.
+A Python client for interacting with the pfSense web interface. This library provides programmatic access to pfSense's user management, VPN configuration, and certificate management features.
 
 ## Features
 
-- User Management:
-  - Create new users with customizable attributes
+- User Management
+  - Create new users with certificates
   - Edit existing users
   - Remove users
-- Certificate Management:  
-  - Parse and retrieve certificate information
-  - Check if certificates are about to expire
+  - List all users
+
+- OpenVPN Configuration
+  - Download OpenVPN bundles for users
+  - Support for various client configurations (Windows, Android, iOS)
+  - Bundle customization options
+
+- Certificate Management
+  - Parse and list certificates
   - Renew certificates
   - Remove certificates
-- OpenVPN Client Configuration:
-  - Download OpenVPN client configuration bundles
-  - Customize bundle categories and options
-- Robust Error Handling:
-  - Custom exceptions for specific error scenarios
-  - Detailed error messages for easier debugging
-- Logging:
-  - Built-in logging for tracking module actions and errors
-- Session Management:
-  - Automatic handling of authentication and CSRF tokens
-  - Retry mechanism for handling network failures
+  - Auto-renewal support for expiring certificates
 
 ## Installation
 
-1. Clone the repository or download the module files.
-2. Install the required dependencies:
-   ```
-   pip install requests beautifulsoup4
-   ```
-3. Import the PfsenseAPI class in your Python script:
-   ```python
-   from pfsense_api import PfsenseAPI
-   ```
+You can install the package using pip:
 
-## Usage
+```bash
+pip install pfsense-api-client
+```
 
-1. Create an instance of the PfsenseAPI class:
-   ```python
-   pfsense = PfsenseAPI()
-   ```
-2. Use the available methods to interact with pfSense. For example:
-   - Create a new user:
-     ```python
-     pfsense.create_user(user_name, user_password)
-     ```
-   - Download an OpenVPN client configuration bundle:
-     ```python
-     pfsense.download_openvpn_bundle(username, dest_folder)  
-     ```
-   - Renew certificates that are about to expire:
-     ```python
-     pfsense.renew_certs(days_before_expiration=90)
-     ```
+Or install from source:
 
-Refer to the module's docstrings and inline comments for detailed information on each method's parameters and usage.
+```bash
+git clone https://github.com/yourusername/pfsense-api-client.git
+cd pfsense-api-client
+pip install -e .
+```
 
-## Configuration
+## Quick Start
 
-The module relies on a `Settings` class to retrieve the pfSense configuration. Make sure to properly set up the `Settings` class with the correct host, username, and password for your pfSense instance.
+Here's a simple example to get you started:
+
+```python
+from pfsense_api import PfsenseAPI
+
+# Initialize the client
+config = {
+    "host": "your-pfsense-host",
+    "username": "admin",
+    "password": "your-password"
+}
+
+client = PfsenseAPI(config)
+
+# Create a new user with certificate
+client.create_user(
+    user_name="newuser",
+    user_password="userpass123",
+    groups=["VPNUsers"],
+    create_cert=True
+)
+
+# Download OpenVPN configuration for the user
+client.download_openvpn_bundle(
+    username="newuser",
+    dest_folder="./vpn_configs",
+    bundle_cat1="Current Windows Installers (2.5.2-Ix01)",
+    bundle_cat2="64-bit"
+)
+```
+
+## Configuration Options
+
+The PfsenseAPI client accepts the following configuration parameters:
+
+- `host`: Your pfSense server hostname or IP address
+- `username`: Administrator username
+- `password`: Administrator password
+
+## Common Operations
+
+### Managing Users
+
+```python
+# Create a user
+client.create_user(
+    user_name="newuser",
+    user_password="password123",
+    groups=["VPNUsers"],
+    create_cert=True,
+    key_type="RSA",
+    key_len=4096
+)
+
+# Edit a user
+client.edit_user(
+    username="existinguser",
+    new_password="newpass123",
+    groups=["NewGroup"]
+)
+
+# Remove a user
+client.remove_user("username")
+```
+
+### Managing Certificates
+
+```python
+# Renew certificates that will expire within 90 days
+client.renew_certs(days_before_expiration=90)
+
+# Renew specific user's certificate
+client.renew_cert_user("username")
+
+# Remove user's certificate
+client.remove_cert_user("username")
+```
+
+### OpenVPN Configuration
+
+```python
+# Download Windows 64-bit installer
+client.download_openvpn_bundle(
+    username="user",
+    dest_folder="./vpn_configs",
+    bundle_cat1="Current Windows Installers (2.5.2-Ix01)",
+    bundle_cat2="64-bit"
+)
+
+# Download Android configuration
+client.download_openvpn_bundle(
+    username="user",
+    dest_folder="./vpn_configs",
+    bundle_cat1="Inline Configurations",
+    bundle_cat2="Android"
+)
+```
 
 ## Error Handling
 
-The module raises custom exceptions for specific error scenarios. Catch these exceptions in your code to handle errors gracefully. The available exceptions include:
-- `UserAlreadyExistsError`
-- `VpnExportForUserNotFoundError`
-- `UserNotFoundError` 
-- `CertificateNotFoundError`
-- `CertificatRenewalError`
-- `CertificatesParsingError`
+The library includes several custom exceptions for specific error cases:
+
+- `AuthenticationException`: Failed to authenticate with pfSense
+- `UserAlreadyExistsError`: Attempted to create a user that already exists
+- `UserNotFoundError`: User not found in the system
+- `CertificateNotFoundError`: Certificate not found for the specified user
+- `CertificateRenewalError`: Failed to renew certificate
+- `VpnExportForUserNotFoundError`: VPN configuration not found for user
 
 ## Logging
 
-The module uses the `Logger` class for logging. Log messages are generated for important actions and errors. You can customize the logging behavior by modifying the `Logger` class.
+The library uses Python's built-in logging system. You can configure the logging level and format according to your needs:
+
+```python
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+```
 
 ## Contributing
 
-Contributions to the PfsenseAPI module are welcome! If you find any bugs, have suggestions for improvements, or want to add new features, please open an issue or submit a pull request on the GitHub repository.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This module is open-source and available under the [MIT License](https://opensource.org/licenses/MIT).
+This project is licensed under the MIT License - see the LICENSE file for details.
