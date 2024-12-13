@@ -12,7 +12,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/hadamrd/pfsense-api-client",
-    packages=find_packages(),
+    py_modules=['PfsenseAPI', 'Logger'], 
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: System Administrators",
