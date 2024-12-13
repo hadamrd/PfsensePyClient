@@ -9,14 +9,10 @@ import urllib3
 from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-
-from tmma_automation.apis.exceptions import AuthenticationException
-from tmma_automation.inventory.Settings import Settings
-from tmma_automation.tools import secrets
 from tmma_automation.tools.logger import Logger
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
+class AuthenticationException(Exception): ...
 class UserAlreadyExistsError(Exception):...
 class VpnExportForUserNotFoundError(Exception): ...
 class UserNotFoundError(Exception): ...
@@ -46,8 +42,7 @@ class PfsenseAPI:
         },
     }
 
-    def __init__(self):
-        config = Settings.get_pfsense()
+    def __init__(self, config):
         self.host = config.get("host")
         self.base_url = f"https://{self.host}"
         self.curr_url = None
@@ -70,8 +65,7 @@ class PfsenseAPI:
         self.session.mount("http://", adapter)
         self.session.mount("https://", adapter)
         self.csrf_token = None
-        deciph_password = secrets.decipher_secret(self.password)
-        self.login(self.username, deciph_password)
+        self.login(self.username, self.password)
         self.users_certs = {}
 
     def go_to_page(self, page_url):
