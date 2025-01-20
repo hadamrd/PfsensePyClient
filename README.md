@@ -32,7 +32,7 @@ pip install pfsense-api-client
 Or install from source:
 
 ```bash
-git clone https://github.com/yourusername/pfsense-api-client.git
+git clone https://github.com/hadamrd/PfsenseApiPyClient.git
 cd pfsense-api-client
 pip install -e .
 ```
