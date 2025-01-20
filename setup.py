@@ -6,8 +6,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setup(
     name="pfsense-api-client",
     version="0.1.0",
-    author="hadamrd9923",
-    author_email="hadamrd9923@gmail.com",
+    author="khalid.majdoub",
+    author_email="majdoub.khalid@gmail.com",
     description="A Python client for interacting with the pfSense web interface",
     long_description=long_description,
     long_description_content_type="text/markdown",
